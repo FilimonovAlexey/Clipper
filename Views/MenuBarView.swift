@@ -14,6 +14,28 @@ struct MenuBarView: View {
     @State private var showingSettings = false
 
     var body: some View {
+        ZStack {
+            // Main clipboard view
+            if !showingSettings {
+                mainView
+                    .transition(.move(edge: .leading))
+            }
+
+            // Settings view
+            if showingSettings {
+                SettingsView(settings: settings, onDismiss: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showingSettings = false
+                    }
+                })
+                .transition(.move(edge: .trailing))
+            }
+        }
+        .frame(width: 380, height: 500)
+        .background(.ultraThinMaterial)
+    }
+
+    private var mainView: some View {
         VStack(spacing: 0) {
             // Header
             header
@@ -35,11 +57,6 @@ struct MenuBarView: View {
 
             // Footer
             footer
-        }
-        .frame(width: 380, height: 500)
-        .background(Color(nsColor: .windowBackgroundColor))
-        .sheet(isPresented: $showingSettings) {
-            SettingsView(settings: settings)
         }
     }
 
@@ -108,7 +125,11 @@ struct MenuBarView: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            Button(action: { showingSettings = true }) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showingSettings = true
+                }
+            }) {
                 Label("Settings", systemImage: "gear")
                     .font(.system(size: 11))
             }

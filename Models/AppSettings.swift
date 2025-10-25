@@ -54,19 +54,25 @@ class AppSettings: ObservableObject {
         // Apply initial appearance
         applyAppearance(self.appearanceMode)
 
-        // Subscribe to appearanceMode changes using Combine
-        // This happens OUTSIDE of the view update cycle
+        // Observe appearance changes
+        observeAppearanceChanges()
+    }
+
+    private func observeAppearanceChanges() {
+        // Use debounce to avoid "Publishing changes from within view updates"
         $appearanceMode
-            .dropFirst() // Skip initial value (already applied above)
+            .dropFirst() // Skip initial value
+            .debounce(for: .milliseconds(50), scheduler: DispatchQueue.main)
             .sink { [weak self] newMode in
-                self?.defaults.set(newMode.rawValue, forKey: Keys.appearanceMode)
-                self?.applyAppearance(newMode)
+                guard let self = self else { return }
+                self.defaults.set(newMode.rawValue, forKey: Keys.appearanceMode)
+                self.applyAppearance(newMode)
             }
             .store(in: &cancellables)
     }
 
     private func applyAppearance(_ mode: AppearanceMode) {
-        // Apply appearance change on next run loop to avoid publishing during view update
+        // Apply appearance to entire app
         DispatchQueue.main.async {
             switch mode {
             case .system:
@@ -75,6 +81,11 @@ class AppSettings: ObservableObject {
                 NSApp.appearance = NSAppearance(named: .aqua)
             case .dark:
                 NSApp.appearance = NSAppearance(named: .darkAqua)
+            }
+
+            // Force update all windows
+            for window in NSApp.windows {
+                window.invalidateShadow()
             }
         }
     }

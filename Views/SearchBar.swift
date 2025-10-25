@@ -34,8 +34,7 @@ struct SearchBar: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Color(nsColor: .controlBackgroundColor))
-        .cornerRadius(6)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
         .padding(.horizontal, 12)
         .padding(.top, 8)
     }

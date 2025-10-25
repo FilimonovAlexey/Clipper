@@ -10,10 +10,7 @@ import SwiftUI
 /// Settings window
 struct SettingsView: View {
     @ObservedObject var settings: AppSettings
-    @Environment(\.dismiss) private var dismiss
-
-    // Local state to avoid publishing during view updates
-    @State private var selectedAppearance: AppearanceMode = .system
+    var onDismiss: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +19,9 @@ struct SettingsView: View {
                 Text("Settings")
                     .font(.system(size: 16, weight: .semibold))
                 Spacer()
-                Button(action: { dismiss() }) {
+                Button(action: {
+                    onDismiss?()
+                }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
                         .font(.system(size: 16))
@@ -42,8 +41,11 @@ struct SettingsView: View {
                                 .font(.system(size: 13))
                             Spacer()
                             Text("\(settings.itemLimit)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 2)
+                                .background(.regularMaterial, in: Capsule())
                         }
 
                         Slider(value: Binding(
@@ -79,19 +81,13 @@ struct SettingsView: View {
                         Text("Appearance:")
                             .font(.system(size: 13))
 
-                        Picker("", selection: $selectedAppearance) {
+                        Picker("", selection: $settings.appearanceMode) {
                             ForEach(AppearanceMode.allCases) { mode in
                                 Text(mode.rawValue).tag(mode)
                             }
                         }
                         .pickerStyle(.segmented)
                         .labelsHidden()
-                        .onChange(of: selectedAppearance) { newValue in
-                            // Apply change asynchronously to avoid publishing during view update
-                            DispatchQueue.main.async {
-                                settings.appearanceMode = newValue
-                            }
-                        }
 
                         Text("Choose the app's color scheme")
                             .font(.system(size: 11))
@@ -110,11 +106,11 @@ struct SettingsView: View {
                             HStack {
                                 Text("⌘⇧V")
                                     .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                    .foregroundColor(.secondary)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color(nsColor: .controlBackgroundColor))
-                                    .cornerRadius(4)
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 6))
+                                    .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
 
                                 Text("Toggle Clipper window")
                                     .font(.system(size: 12))
@@ -124,11 +120,11 @@ struct SettingsView: View {
                             HStack {
                                 Text("⌘⇧C")
                                     .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                    .foregroundColor(.secondary)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color(nsColor: .controlBackgroundColor))
-                                    .cornerRadius(4)
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 6))
+                                    .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
 
                                 Text("Clear all history")
                                     .font(.system(size: 12))
@@ -138,11 +134,11 @@ struct SettingsView: View {
                             HStack {
                                 Text("ESC")
                                     .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                    .foregroundColor(.secondary)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color(nsColor: .controlBackgroundColor))
-                                    .cornerRadius(4)
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 6))
+                                    .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
 
                                 Text("Close window")
                                     .font(.system(size: 12))
@@ -170,17 +166,13 @@ struct SettingsView: View {
                 Spacer()
 
                 Button("Done") {
-                    dismiss()
+                    onDismiss?()
                 }
                 .keyboardShortcut(.defaultAction)
             }
             .padding(16)
         }
-        .frame(width: 450, height: 550)
-        .background(Color(nsColor: .windowBackgroundColor))
-        .onAppear {
-            // Sync local state with settings when view appears
-            selectedAppearance = settings.appearanceMode
-        }
+        .frame(width: 380, height: 500)
+        .background(.ultraThinMaterial)
     }
 }
