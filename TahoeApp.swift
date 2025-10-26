@@ -44,9 +44,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Setup ESC key monitor
         setupEventMonitor()
-
-        // Apply appearance
-        applyInitialAppearance()
     }
 
     private func setupMenuBar() {
@@ -95,17 +92,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             return event
-        }
-    }
-
-    private func applyInitialAppearance() {
-        switch settings.appearanceMode {
-        case .system:
-            NSApp.appearance = nil
-        case .light:
-            NSApp.appearance = NSAppearance(named: .aqua)
-        case .dark:
-            NSApp.appearance = NSAppearance(named: .darkAqua)
         }
     }
 

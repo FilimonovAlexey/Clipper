@@ -33,6 +33,7 @@ struct MenuBarView: View {
         }
         .frame(width: 380, height: 500)
         .background(.ultraThinMaterial)
+        .preferredColorScheme(settings.colorScheme)
     }
 
     private var mainView: some View {

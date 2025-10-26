@@ -15,7 +15,7 @@ class ClipboardManager: ObservableObject {
     @Published var items: [ClipboardItem] = []
     @Published var searchText: String = ""
 
-    private let pasteboardMonitor = PasteboardMonitor()
+    private let pasteboardMonitor: PasteboardMonitor
     private let storageManager = StorageManager()
     private var settings: AppSettings
     private var cancellables = Set<AnyCancellable>()
@@ -47,6 +47,7 @@ class ClipboardManager: ObservableObject {
 
     init(settings: AppSettings) {
         self.settings = settings
+        self.pasteboardMonitor = PasteboardMonitor()
         loadHistory()
         startMonitoring()
 
@@ -68,7 +69,7 @@ class ClipboardManager: ObservableObject {
     }
 
     /// Stops monitoring the pasteboard
-    nonisolated func stopMonitoring() {
+    func stopMonitoring() {
         pasteboardMonitor.stopMonitoring()
     }
 
@@ -164,7 +165,11 @@ class ClipboardManager: ObservableObject {
         saveHistory()
     }
 
-    nonisolated deinit {
-        stopMonitoring()
+    deinit {
+        // Note: deinit is implicitly nonisolated, but we can call methods
+        // on non-actor properties like pasteboardMonitor
+        Task { @MainActor [pasteboardMonitor] in
+            pasteboardMonitor.stopMonitoring()
+        }
     }
 }

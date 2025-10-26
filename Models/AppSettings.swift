@@ -8,12 +8,10 @@
 import Foundation
 import SwiftUI
 import Combine
-import AppKit
 
 /// User preferences stored in UserDefaults
 class AppSettings: ObservableObject {
     private let defaults = UserDefaults.standard
-    private var cancellables = Set<AnyCancellable>()
 
     // Keys
     private enum Keys {
@@ -35,7 +33,11 @@ class AppSettings: ObservableObject {
         }
     }
 
-    @Published var appearanceMode: AppearanceMode
+    @Published var appearanceMode: AppearanceMode {
+        didSet {
+            defaults.set(appearanceMode.rawValue, forKey: Keys.appearanceMode)
+        }
+    }
 
     init() {
         // Load saved values
@@ -50,43 +52,17 @@ class AppSettings: ObservableObject {
         } else {
             self.appearanceMode = .system
         }
-
-        // Apply initial appearance
-        applyAppearance(self.appearanceMode)
-
-        // Observe appearance changes
-        observeAppearanceChanges()
     }
 
-    private func observeAppearanceChanges() {
-        // Use debounce to avoid "Publishing changes from within view updates"
-        $appearanceMode
-            .dropFirst() // Skip initial value
-            .debounce(for: .milliseconds(50), scheduler: DispatchQueue.main)
-            .sink { [weak self] newMode in
-                guard let self = self else { return }
-                self.defaults.set(newMode.rawValue, forKey: Keys.appearanceMode)
-                self.applyAppearance(newMode)
-            }
-            .store(in: &cancellables)
-    }
-
-    private func applyAppearance(_ mode: AppearanceMode) {
-        // Apply appearance to entire app
-        DispatchQueue.main.async {
-            switch mode {
-            case .system:
-                NSApp.appearance = nil
-            case .light:
-                NSApp.appearance = NSAppearance(named: .aqua)
-            case .dark:
-                NSApp.appearance = NSAppearance(named: .darkAqua)
-            }
-
-            // Force update all windows
-            for window in NSApp.windows {
-                window.invalidateShadow()
-            }
+    /// Computed property for SwiftUI's preferredColorScheme
+    var colorScheme: ColorScheme? {
+        switch appearanceMode {
+        case .system:
+            return nil
+        case .light:
+            return .light
+        case .dark:
+            return .dark
         }
     }
 

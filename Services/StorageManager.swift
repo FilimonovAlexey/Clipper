@@ -14,7 +14,7 @@ class StorageManager {
 
     private var fileURL: URL {
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let appDirectory = appSupport.appendingPathComponent("Clipper", isDirectory: true)
+        let appDirectory = appSupport.appendingPathComponent("Tahoe", isDirectory: true)
 
         // Create directory if it doesn't exist
         if !fileManager.fileExists(atPath: appDirectory.path) {
